@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Cainos/Pixel Art Top Down - Basic/Scene/SC Pixel Art Top Down - Basic.unity
+- path: "Assets/\u5834\u666F/\u904A\u6232\u5834\u666F.unity"
   isLoaded: 1
   isActive: 1
   isSubScene: 0
