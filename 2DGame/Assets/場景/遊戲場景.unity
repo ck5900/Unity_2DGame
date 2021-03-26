@@ -14900,9 +14900,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a628c2ec40384b84694db04cfc2c1bc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1.5
-  limitY: {x: -5, y: 5}
-  limitX: {x: -5, y: 5}
+  speed: 2.5
+  limitY: {x: -10, y: 10}
+  limitX: {x: -2.5, y: 1.5}
+  player: {fileID: 1436113766}
 --- !u!1001 &1323407515
 PrefabInstance:
   m_ObjectHideFlags: 0
