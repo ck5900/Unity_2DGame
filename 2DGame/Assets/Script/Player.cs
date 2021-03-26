@@ -29,6 +29,21 @@ public class Player : MonoBehaviour
     public Transform tra;
     [Header("動畫元件")]
     public Animator ani;
+    [Header("偵測範圍")]
+    public float rangAttack = 2.5f;
+    [Header("音效來源")]
+    public AudioSource aud;
+    [Header("攻擊音效")]
+    public AudioClip soundAttack;
+
+    // 事件:繪製圖示
+    private void OnDrawGizmos()
+    {
+        //指定圖示顏色 (紅.綠.藍.透明)
+        Gizmos.color = new Color(1, 0, 0, 0.2f);
+        //繪製圖示 球體(中心點.半徑)
+        Gizmos.DrawSphere(transform.position, rangAttack);
+    }
 
     //方法語法 Method - 儲存複雜的程式區塊或演算法
     //修飾詞 類型 名稱 () { 程式區塊或演算法 }
@@ -50,10 +65,22 @@ public class Player : MonoBehaviour
         ani.SetFloat("垂直", v);
     }
 
-    private void Attack()
+    // 要被按鈕呼叫必須設定為公開 public
+    public void Attack()
     {
- 
+        // 音效來源.播放一次(音效片段.音量)
+        aud.PlayOneShot(soundAttack, 0.5f);
+        
+        // 2D 物理 圓形碰撞(中心點.半徑.方向.距離.圖層)
+        RaycastHit2D hit = Physics2D.CircleCast(transform.position, rangAttack, -transform.up,0,1<<8);
+
+        //如果 碰到的物件 標籤 為 道具 就刪除(碰到的碰撞器的遊戲物件)
+        if (hit.collider.tag == "道具") Destroy(hit.collider.gameObject);
+
+
+
     }
+
 
     private void Hit()
     {
