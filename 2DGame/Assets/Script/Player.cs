@@ -1,7 +1,9 @@
 ﻿
 using UnityEngine;
 using UnityEngine.UI;  //引用 介面 API
- 
+using UnityEngine.SceneManagement;
+
+
 public class Player : MonoBehaviour
 {
     //註解
@@ -20,8 +22,6 @@ public class Player : MonoBehaviour
     public int lv = 1;
     [Header("移動速度"), Range(0, 300)]
     public float speed = 10.5f;
-    [Header("角色是否死亡")]
-    public bool isDead = false;
     [Tooltip("角色名稱")]
     public string cName = "貓咪";
     [Header("虛擬搖桿")]
@@ -40,6 +40,13 @@ public class Player : MonoBehaviour
     public float hp = 200;
     [Header("血條系統")]
     public HpManager hpManager;
+    [Header("攻擊力"), Range(0, 1000)]
+    public float attack = 20;
+    [Header("等級文字")]
+    public Text textLv;
+
+    private bool isDead = false;
+
 
     private float hpMax;
 
@@ -61,6 +68,7 @@ public class Player : MonoBehaviour
     /// </summary>
     private void Move()
     {
+        if (isDead) return;                   //如果 死亡 就跳出
 
         float h = joystick.Horizontal;
         float v = joystick.Vertical;
@@ -75,6 +83,8 @@ public class Player : MonoBehaviour
     // 要被按鈕呼叫必須設定為公開 public
     public void Attack()
     {
+        if (isDead) return;                   //如果 死亡 就跳出
+
         // 音效來源.播放一次(音效片段.音量)
         aud.PlayOneShot(soundAttack, 0.5f);
         
@@ -84,7 +94,9 @@ public class Player : MonoBehaviour
         //如果 碰到的物件存在 並且 碰到的物件 標籤 為 道具 就取得道具腳本並呼叫掉落道具方法
         if (hit && hit.collider.tag == "道具") hit.collider.GetComponent<Item>().DropProp();
 
- }
+        if (hit && hit.collider.tag == "敵人") hit.collider.GetComponent<Enemy>().Hit(attack);
+
+    }
 
     //要被其他腳本呼叫也要設為公開
     /// <summary>
@@ -93,16 +105,26 @@ public class Player : MonoBehaviour
     /// <param name="damage">接收到的傷害值</param>
     public void Hit(float damage)
     {
-        hp -= damage;                          //扣除傷害值
-        hpManager.UpdateHpBar(hp, hpMax);      //更新血條
-        StartCoroutine(hpManager.ShowDamage());
+        hp -= damage;                                    //扣除傷害值
+        hpManager.UpdateHpBar(hp, hpMax);                //更新血條
+        StartCoroutine(hpManager.ShowDamage(damage));    //啟動同協程式(顯示傷害值)
+
+        if (hp <= 0) Dead();                             //如果 血量 <= 就死亡
     }
 
     private void Dead()
     {
-
+        hp = 0;
+        isDead = true;
+        Invoke("Replay", 2);
     }
-
+    /// <summary>
+    /// 重新遊戲
+    /// </summary>
+    private void Replay()
+    {
+        SceneManager.LoadScene("遊戲場景");
+    }
 
     //事件 - 特定時間會執行的方法
     // 開始事件 : 播放後執行一次
