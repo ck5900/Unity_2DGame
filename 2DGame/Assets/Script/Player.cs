@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
+    #region 欄位
     //註解
 
     //欄位語法
@@ -44,11 +45,16 @@ public class Player : MonoBehaviour
     public float attack = 20;
     [Header("等級文字")]
     public Text textLv;
+    [Header("吃金條音效")]
+    public AudioClip sounEat;
+    [Header("金條")]
+    public Text textCoin;
 
     private bool isDead = false;
-
-
     private float hpMax;
+    private int coin;
+    #endregion
+
 
     // 事件:繪製圖示
     private void OnDrawGizmos()
@@ -126,11 +132,77 @@ public class Player : MonoBehaviour
         SceneManager.LoadScene("遊戲場景");
     }
 
+    private float exp;
+    /// <summary>
+    /// 需要多少經驗值才會升等,一等設定為100
+    /// </summary>
+    private float expNeed = 100;
+
+    [Header("經驗值吧條")]
+    public Image imgExp;
+
+   
+
+    /// <summary>
+    /// 經驗值控制
+    /// </summary>
+    /// <param name "getExp">接受到的經驗值</param>
+    public void Exp(float getExp)
+    {
+        //取得目前等級需要的經驗需求
+        //要取得的資料為 等級 減一
+        expNeed = expData.exp[lv - 1];
+
+        exp += getExp;
+        print("經驗值:" + exp);
+        imgExp.fillAmount = exp / expNeed;
+
+        // 升級
+        // 迴圈 whole
+        // 語法:
+        // whole (布林值) { 布林值 為 true 時持續執行}
+        // if (布林值) { 布林值 為 true 時執行一次}
+        while (exp >= expNeed)                    //如果 經驗值 >=經驗需求 ex 120>100
+        {
+            lv++;                                 //升級 ex2
+            textLv.text = "Lv" + lv;              //介面更新 ex Lv2
+            exp -= expNeed;                       //將多餘的經驗值補回來 ex 120-100=20
+            imgExp.fillAmount = exp / expNeed;    //介面更新
+            expNeed = expData.exp[lv - 1];
+            LevelUp();                            //呼叫升級方式
+        }
+    }
+
+    /// <summary>
+    /// 升級後的數據更新,攻擊力與血量,升級後恢復血量
+    /// </summary>
+    private void LevelUp()
+    {
+        //攻擊力每一等提升10,從 20 開始
+        attack = 20 + (lv - 1) * 10;
+        //血量每一等提升50,從 200 開始
+        hpMax = 200 + (lv - 1) * 50;
+
+        hp = hpMax;                          // 恢復血量全滿
+        hpManager.UpdateHpBar(hp, hpMax);    // 更新寫條
+    }
+
+    [Header("經驗值資料")]
+    public ExpData expData;
+
     //事件 - 特定時間會執行的方法
     // 開始事件 : 播放後執行一次
     private void Start()
     {
         hpMax = hp;    //取得血量最大值
+
+        //利用公式寫入經驗值資料 , 一等100 , 兩等 200
+        for (int i = 0; i < 99; i++)
+        {
+            // 經驗值資料 的 經驗值陣列[編號] = 攻式
+            // 公式:(編號 + 1) * 100 , 每等增加 100
+            expData.exp[i] = (i + 1) * 100;
+        }
     }
 
     // 更新事件 : 大約一秒執行六十次 60FPS
@@ -141,14 +213,7 @@ public class Player : MonoBehaviour
         Move();
     }
 
-    [Header("吃金條音效")]
-    public AudioClip sounEat;
-    [Header("金條")]
-    public Text textCoin;
-
-    private int coin;
-
-    //觸發事件 - 進入 : 兩個物件必須有一個勾選 Is Trigger
+   //觸發事件 - 進入 : 兩個物件必須有一個勾選 Is Trigger
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == "金條")

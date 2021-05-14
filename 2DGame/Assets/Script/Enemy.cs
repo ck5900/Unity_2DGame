@@ -14,7 +14,7 @@ public class Enemy : MonoBehaviour
     public float cdAttack = 3;
     [Header("攻擊力"), Range(0, 1000)]
     public float attack = 20;
-    [Header("經驗值"), Range(0, 500)]
+    [Header("經驗值"), Range(0, 50000)]
     public float exp = 30;
 
     private bool isDead = false;
@@ -115,10 +115,14 @@ public class Enemy : MonoBehaviour
         
         private void Dead()
         {
+            if (isDead) return;            //如果 死亡 就跳出
             hp = 0;
             isDead = true;
-            Destroy(gameObject, 1.5f);
+            Destroy(gameObject, 0.5f);
+            _player.Exp(exp);              //將經驗值傳給玩家 
+
         }
+    
 
     
 }
